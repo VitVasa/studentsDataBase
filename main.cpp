@@ -43,24 +43,25 @@ void loadDatabase(std::vector<Student>& database, const std::string& filename) {
         std::cout << "Ошибка открытия файла для чтения!\n";
         return;
     }
-    
-    
+        
     std::string line;
     while (std::getline(file, line)) {
         std::vector<std::string> fields;
         std::stringstream ss(line);
         std::string field;
         
+        // Разделяем строку по запятым на поля
         while (std::getline(ss, field, ',')) {
             fields.push_back(field);
         }
         
+        // Проверяем корректность количества полей
         if (fields.size() == 4) {
             Student student;
             student.name = fields[0];
-            student.age = std::stoi(fields[1]);
+            student.age = std::stoi(fields[1]);    // Преобразуем строку в int
             student.major = fields[2];
-            student.gpa = std::stod(fields[3]);
+            student.gpa = std::stod(fields[3]);    // Преобразуем строку в double
             
             database.push_back(student);
         }
@@ -72,6 +73,7 @@ void loadDatabase(std::vector<Student>& database, const std::string& filename) {
 
 int main() {
     std::vector<Student> database;
+    std::string filename; // Имя файла для загрузки
 
     int choice;
     do {
@@ -94,6 +96,7 @@ int main() {
                 std::cout << "Введите имя файла для загрузки: ";
                 std::getline(std::cin, filename);
                 {
+                    // Проверяем существование файла перед загрузкой
                     std::ifstream testFile(filename);
                     if (!testFile.good()) {
                         std::cout << "Файл не существует!\n";
@@ -112,4 +115,3 @@ int main() {
 
     return 0;
 }
-
