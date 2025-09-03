@@ -78,6 +78,7 @@ int main() {
         std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
         std::cout << "2. Вывести список студентов\n";
+        std::cout << "3. Сохранить базу данных студентов из файла\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
         std::cin >> choice;
@@ -89,6 +90,18 @@ int main() {
             case 2:
                 displayStudents(database);
                 break;
+            case 3:
+                std::cout << "Введите имя файла для загрузки: ";
+                std::getline(std::cin, filename);
+                {
+                    std::ifstream testFile(filename);
+                    if (!testFile.good()) {
+                        std::cout << "Файл не существует!\n";
+                        break;
+                    }
+                }
+                loadDatabase(database, filename);
+                break;
             case 0:
                 std::cout << "Выход из программы.\n";
                 break;
@@ -99,3 +112,4 @@ int main() {
 
     return 0;
 }
+
