@@ -65,16 +65,16 @@ void loadDatabase(std::vector<Student>& database) {
     std::cout << "Введите имя файла для загрузки: ";
     std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
     std::getline(std::cin, filename); 
-    {
+    
     // Предварительная проверка существования файла
-        std::ifstream testFile(filename);
-        if (!testFile.is_open()) {
-                std::cout << "Файл не существует или недоступен!\n";
-                testFile.close();
-                break;
-            }
-            testFile.close();
-        }
+    std::ifstream testFile(filename);
+    if (!testFile.is_open()) {
+        std::cout << "Файл не существует или недоступен!\n";
+        testFile.close();
+        return;
+    }
+    testFile.close();
+    
     std::ifstream file(filename);
     
     // Проверка успешного открытия файла
@@ -107,7 +107,6 @@ void loadDatabase(std::vector<Student>& database) {
                 student.major = fields[2];            
                 student.gpa = std::stod(fields[3]);     
                 
-   
                 database.push_back(student);
                 loadedCount++;  
             } catch (const std::exception& e) {
@@ -121,16 +120,15 @@ void loadDatabase(std::vector<Student>& database) {
     }
     
     file.close();
-        std::cout << "Загружено " << loadedCount << " студентов, ошибок: " << errorCount << "\n";
+    std::cout << "Загружено " << loadedCount << " студентов, ошибок: " << errorCount << "\n";
 }
-
 
 // Тест для функции addStudent
 TEST(StudentDatabase, AddStudentTest) {
     std::vector<Student> database;
 
     // Тестовые данные
-    std::string input = "Sam\n22\nLаw\n4.8\n";
+    std::string input = "Sam\n22\nLaw\n4.8\n";
     std::stringstream input_stream(input);
     std::streambuf* old_cin = std::cin.rdbuf();
     std::cin.rdbuf(input_stream.rdbuf());
@@ -143,7 +141,7 @@ TEST(StudentDatabase, AddStudentTest) {
     EXPECT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].name, "Sam");
     EXPECT_EQ(database[0].age, 22);
-    EXPECT_EQ(database[0].major, "Lаw");
+    EXPECT_EQ(database[0].major, "Law");
     EXPECT_NEAR(database[0].gpa, 4.8, 1e-6);
 }
 
@@ -162,7 +160,7 @@ TEST(StudentDatabase, DisplayEmptyDatabaseTest) {
     std::cout.rdbuf(old_cout);
     
     std::string output = output_stream.str();
-    EXPECT_EQ(output, "Список студентов:\n");
+    EXPECT_TRUE(output.find("База данных пуста") != std::string::npos);
 }
 
 // Тест для функции displayStudents с несколькими студентами
@@ -191,7 +189,7 @@ TEST(StudentDatabase, DisplayMultipleStudentsTest) {
 
 TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     std::vector<Student> database;
-    size_t initialSize = database.size(); // Запоминаем размер ДО загрузки
+    size_t initialSize = database.size();
     
     // Создаем временный тестовый CSV-файл
     std::ofstream testFile("test_valid.csv");
@@ -199,9 +197,9 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     testFile << "Charly,27,informatics,5.0\n";
     testFile.close();
     
-   // Перенаправляем ввод для имитации пользовательского ввода
+    // Перенаправляем ввод для имитации пользовательского ввода
     std::stringstream input_stream;
-    input_stream << "test_valid.csv\n"; // Имитируем ввод имени файла
+    input_stream << "test_valid.csv\n";
     
     // Сохраняем оригинальный std::cin и перенаправляем на наш поток
     std::streambuf* old_cin = std::cin.rdbuf();
@@ -212,46 +210,33 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
     
-    // Вызываем тестируемую функцию (теперь она запросит файл через cin)
+    // Вызываем тестируемую функцию
     loadDatabase(database);
     
     // Восстанавливаем стандартные потоки
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
     
-    
     // Проверяем что размер увеличился на 2
     ASSERT_EQ(database.size(), initialSize + 2);
     
-    // Перехватываем вывод для проверки содержимого
-    std::stringstream output_stream;
-    std::streambuf* old_cout = std::cout.rdbuf();
-    std::cout.rdbuf(output_stream.rdbuf());
+    // Проверяем содержимое напрямую через структуры
+    EXPECT_EQ(database[0].name, "Cas");
+    EXPECT_EQ(database[0].age, 1000);
+    EXPECT_EQ(database[0].major, "history");
+    EXPECT_EQ(database[0].gpa, 4.6);
     
-    displayStudents(database);
+    EXPECT_EQ(database[1].name, "Charly");
+    EXPECT_EQ(database[1].age, 27);
+    EXPECT_EQ(database[1].major, "informatics");
+    EXPECT_EQ(database[1].gpa, 5.0);
     
-    // Восстанавливаем std::cout
-    std::cout.rdbuf(old_cout);
-    
-    std::string output = output_stream.str();
-    
-    // Ищем все ожидаемые данные в выводе
-    EXPECT_TRUE(output.find("Cas") != std::string::npos);
-    EXPECT_TRUE(output.find("1000") != std::string::npos);
-    EXPECT_TRUE(output.find("history") != std::string::npos);
-    EXPECT_TRUE(output.find("4.6") != std::string::npos);
-    
-    EXPECT_TRUE(output.find("Charly") != std::string::npos);
-    EXPECT_TRUE(output.find("27") != std::string::npos);
-    EXPECT_TRUE(output.find("informatics") != std::string::npos);
-    EXPECT_TRUE(output.find("5.0") != std::string::npos);
-    
-    remove("test_valid.csv"); // Удаляем временный файл
+    remove("test_valid.csv");
 }
 
 TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     std::vector<Student> database;
-    size_t initialSize = database.size(); // Запоминаем размер ДО загрузки
+    size_t initialSize = database.size();
     
     std::ofstream testFile("test_invalid.csv");
     testFile << "Crowley,many,history,4.7\n"; // Некорректный возраст
@@ -259,7 +244,7 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     
     // Перенаправляем ввод для имитации пользовательского ввода
     std::stringstream input_stream;
-    input_stream << "test_valid.csv\n"; // Имитируем ввод имени файла
+    input_stream << "test_invalid.csv\n";
     
     // Сохраняем оригинальный std::cin и перенаправляем на наш поток
     std::streambuf* old_cin = std::cin.rdbuf();
@@ -270,7 +255,7 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
     
-    // Вызываем тестируемую функцию (теперь она запросит файл через cin)
+    // Вызываем тестируемую функцию
     loadDatabase(database);
     
     // Восстанавливаем стандартные потоки
@@ -281,6 +266,38 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     EXPECT_EQ(database.size(), initialSize);
 
     remove("test_invalid.csv");
+}
+
+TEST(LoadDatabaseTest, HandlesNonExistentFile) {
+    std::vector<Student> database;
+    size_t initialSize = database.size();
+    
+    // Перенаправляем ввод для имитации пользовательского ввода
+    std::stringstream input_stream;
+    input_stream << "non_existent_file.csv\n";
+    
+    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
+    std::streambuf* old_cin = std::cin.rdbuf();
+    std::cin.rdbuf(input_stream.rdbuf());
+    
+    // Также перенаправляем вывод, чтобы проверить сообщения функции
+    std::stringstream output_stream;
+    std::streambuf* old_cout = std::cout.rdbuf();
+    std::cout.rdbuf(output_stream.rdbuf());
+    
+    // Вызываем тестируемую функцию
+    loadDatabase(database);
+    
+    // Восстанавливаем стандартные потоки
+    std::cin.rdbuf(old_cin);
+    std::cout.rdbuf(old_cout);
+    
+    std::string output = output_stream.str();
+    
+    // Проверяем что база не изменилась
+    EXPECT_EQ(database.size(), initialSize);
+    // Проверяем что выведено сообщение об ошибке
+    EXPECT_TRUE(output.find("Файл не существует") != std::string::npos);
 }
 
 void runInteractiveMode() {
