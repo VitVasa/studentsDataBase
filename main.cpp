@@ -58,16 +58,20 @@ void displayStudents(const std::vector<Student>& database) {
  * Читает данные студентов из файла и добавляет их в базу данных
  * Формат файла: строка содержит 4 поля, разделенных запятыми: имя, возраст, специальность, средний балл
  * database - ссылка на вектор студентов 
- * filename - имя файла для загрузки данных
+ * filename - имя файла для загрузки данных (если пустое, запрашивается у пользователя)
  */
-void loadDatabase(std::vector<Student>& database) {
-    std::string filename;
-    std::cout << "Введите имя файла для загрузки: ";
-    std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
-    std::getline(std::cin, filename); 
+void loadDatabase(std::vector<Student>& database, const std::string& filename = "") {
+    std::string file_to_load = filename;
+    
+    // Если имя файла не передано, запрашиваем его
+    if (file_to_load.empty()) {
+        std::cout << "Введите имя файла для загрузки: ";
+        std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
+        std::getline(std::cin, file_to_load);
+    }
     
     // Предварительная проверка существования файла
-    std::ifstream testFile(filename);
+    std::ifstream testFile(file_to_load);
     if (!testFile.is_open()) {
         std::cout << "Файл не существует или недоступен!\n";
         testFile.close();
@@ -75,7 +79,7 @@ void loadDatabase(std::vector<Student>& database) {
     }
     testFile.close();
     
-    std::ifstream file(filename);
+    std::ifstream file(file_to_load);
     
     // Проверка успешного открытия файла
     if (!file.is_open()) {
@@ -198,42 +202,16 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     testFile << "Charly,27,informatics,5.0\n";
     testFile.close();
     
-    // ПРОВЕРКА: убедимся что файл создался
-    std::ifstream checkFile(testFilename);
-    if (!checkFile.is_open()) {
-        FAIL() << "Тестовый файл не создался!";
-    }
-    checkFile.close();
-    
-    // Перенаправляем ввод для имитации пользовательского ввода
-    std::stringstream input_stream;
-    input_stream << testFilename << "\n";
-    
-    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input_stream.rdbuf());
-    
-    // Также перенаправляем вывод, чтобы перехватить сообщения
+    // Перехватываем вывод
     std::stringstream output_stream;
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
     
-    // ВАЖНО: очищаем буфер перед вызовом функции
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    // Используем функцию с передачей имени файла
+    loadDatabase(database, testFilename);
     
-    // Вызываем тестируемую функцию
-    loadDatabase(database);
-    
-    // Восстанавливаем стандартные потоки
-    std::cin.rdbuf(old_cin);
+    // Восстанавливаем std::cout
     std::cout.rdbuf(old_cout);
-    
-    std::string output = output_stream.str();
-    
-    // ДЕБАГ: выведем что получилось
-    std::cout << "DEBUG: Database size: " << database.size() << std::endl;
-    std::cout << "DEBUG: Output: " << output << std::endl;
-    std::cout << "DEBUG: File exists: " << std::ifstream(testFilename).is_open() << std::endl;
     
     // Проверяем что размер увеличился на 2
     ASSERT_EQ(database.size(), initialSize + 2);
@@ -256,58 +234,41 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     std::vector<Student> database;
     size_t initialSize = database.size();
     
-    std::ofstream testFile("test_invalid.csv");
+    std::string testFilename = "test_invalid.csv";
+    std::ofstream testFile(testFilename);
     testFile << "Crowley,many,history,4.7\n"; // Некорректный возраст
     testFile.close();
     
-    // Перенаправляем ввод для имитации пользовательского ввода
-    std::stringstream input_stream;
-    input_stream << "test_invalid.csv\n";
-    
-    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input_stream.rdbuf());
-    
-    // Также перенаправляем вывод, чтобы проверить сообщения функции
+    // Перехватываем вывод
     std::stringstream output_stream;
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
     
-    // Вызываем тестируемую функцию
-    loadDatabase(database);
+    // Используем функцию с передачей имени файла
+    loadDatabase(database, testFilename);
     
-    // Восстанавливаем стандартные потоки
-    std::cin.rdbuf(old_cin);
+    // Восстанавливаем std::cout
     std::cout.rdbuf(old_cout);
     
     // Проверяем что размер НЕ изменился (данные не добавились)
     EXPECT_EQ(database.size(), initialSize);
 
-    remove("test_invalid.csv");
+    remove(testFilename.c_str());
 }
 
 TEST(LoadDatabaseTest, HandlesNonExistentFile) {
     std::vector<Student> database;
     size_t initialSize = database.size();
     
-    // Перенаправляем ввод для имитации пользовательского ввода
-    std::stringstream input_stream;
-    input_stream << "non_existent_file.csv\n";
-    
-    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input_stream.rdbuf());
-    
-    // Также перенаправляем вывод, чтобы проверить сообщения функции
+    // Перехватываем вывод
     std::stringstream output_stream;
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
     
-    // Вызываем тестируемую функцию
-    loadDatabase(database);
+    // Используем функцию с передачей несуществующего файла
+    loadDatabase(database, "non_existent_file.csv");
     
-    // Восстанавливаем стандартные потоки
-    std::cin.rdbuf(old_cin);
+    // Восстанавливаем std::cout
     std::cout.rdbuf(old_cout);
     
     std::string output = output_stream.str();
@@ -339,7 +300,7 @@ void runInteractiveMode() {
                 displayStudents(database);
                 break;
             case 3:
-                loadDatabase(database);
+                loadDatabase(database); 
                 break;
             case 0:
                 std::cout << "Выход из программы.\n";
