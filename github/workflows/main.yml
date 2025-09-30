@@ -1,0 +1,25 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev
+        cd /usr/src/gtest && sudo cmake . && sudo make && sudo cp lib/*.a /usr/lib/
+        
+    - name: Build and test
+      run: |
+        g++ -std=c++17 -o program.out main.cpp -lgtest -lgtest_main -pthread
+        ./program.out --test
