@@ -13,11 +13,7 @@ struct Student {
     double gpa;          // Средний балл успеваемости
 };
 
-/**
- * Функция добавления нового студента в базу данных
- * Запрашивает данные студента и добавляет его в вектор
- * database - ссылка на вектор студентов 
- */
+//Функция добавления нового студента в базу данных
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
@@ -33,17 +29,12 @@ void addStudent(std::vector<Student>& database) {
     std::cout << "Студент добавлен в базу данных.\n";
 }
 
-/**
- * Функция отображения всех студентов в базе данных
- * Выводит информацию о каждом студенте 
- * database - ссылка на вектор студентов 
- */
+// Функция отображения всех студентов в базе данных
 void displayStudents(const std::vector<Student>& database) {
     if (database.empty()) {
         std::cout << "База данных пуста.\n";
         return;
     }
-    
     std::cout << "Список студентов:\n";
     for (const Student& student : database) {
         std::cout << "Имя: " << student.name << "\n";
@@ -53,20 +44,14 @@ void displayStudents(const std::vector<Student>& database) {
     }
 }
 
-/**
- * ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ БАЗЫ ДАННЫХ ИЗ ФАЙЛА
- * Читает данные студентов из файла и добавляет их в базу данных
- * Формат файла: строка содержит 4 поля, разделенных запятыми: имя, возраст, специальность, средний балл
- * database - ссылка на вектор студентов 
- * filename - имя файла для загрузки данных (если пустое, запрашивается у пользователя)
- */
+// ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ БАЗЫ ДАННЫХ ИЗ ФАЙЛА
 void loadDatabase(std::vector<Student>& database, const std::string& filename = "") {
     std::string file_to_load = filename;
     
     // Если имя файла не передано, запрашиваем его
     if (file_to_load.empty()) {
         std::cout << "Введите имя файла для загрузки: ";
-        std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
+        std::cin.ignore();
         std::getline(std::cin, file_to_load);
     }
     
@@ -181,7 +166,6 @@ TEST(StudentDatabase, DisplayMultipleStudentsTest) {
     
     displayStudents(database);
     
-    // Восстанавливает std::cout
     std::cout.rdbuf(old_cout);
     
     std::string output = output_stream.str();
@@ -191,11 +175,11 @@ TEST(StudentDatabase, DisplayMultipleStudentsTest) {
     EXPECT_TRUE(output.find("languages") != std::string::npos);
 }
 
+// Тест для функции loadDatabase с корректными данными
 TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     std::vector<Student> database;
     size_t initialSize = database.size();
     
-    // Создаем временный тестовый CSV-файл
     std::string testFilename = "test_valid.csv";
     std::ofstream testFile(testFilename);
     testFile << "Cas,1000,history,4.6\n";
@@ -230,6 +214,7 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     remove(testFilename.c_str());
 }
 
+// Тест для функции loadDatabase с некорректным форматом чисел
 TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     std::vector<Student> database;
     size_t initialSize = database.size();
@@ -247,7 +232,6 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     // Используем функцию с передачей имени файла
     loadDatabase(database, testFilename);
     
-    // Восстанавливаем std::cout
     std::cout.rdbuf(old_cout);
     
     // Проверяем что размер НЕ изменился (данные не добавились)
@@ -256,6 +240,7 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     remove(testFilename.c_str());
 }
 
+// Тест для функции loadDatabase с несуществующим файлом
 TEST(LoadDatabaseTest, HandlesNonExistentFile) {
     std::vector<Student> database;
     size_t initialSize = database.size();
@@ -268,14 +253,12 @@ TEST(LoadDatabaseTest, HandlesNonExistentFile) {
     // Используем функцию с передачей несуществующего файла
     loadDatabase(database, "non_existent_file.csv");
     
-    // Восстанавливаем std::cout
     std::cout.rdbuf(old_cout);
     
     std::string output = output_stream.str();
     
     // Проверяем что база не изменилась
     EXPECT_EQ(database.size(), initialSize);
-    // Проверяем что выведено сообщение об ошибке
     EXPECT_TRUE(output.find("Файл не существует") != std::string::npos);
 }
 
@@ -311,10 +294,7 @@ void runInteractiveMode() {
     } while (choice != 0);
 }
 
-/**
- * Основная функция программы
- * Содержит главное меню 
- */
+// Основная функция программы
 int main(int argc, char **argv) {
     // Если есть аргументы командной строки, запускает тесты
     if (argc > 1) {
