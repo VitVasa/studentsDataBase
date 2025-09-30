@@ -235,6 +235,7 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
 
 void runInteractiveMode() {
     std::vector<Student> database;
+     std::string filename;
 
     int choice;
     do {
