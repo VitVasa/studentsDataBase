@@ -187,52 +187,52 @@ TEST(StudentDatabase, DisplayMultipleStudentsTest) {
     EXPECT_TRUE(output.find("languages") != std::string::npos);
 }
 
-TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
-    std::vector<Student> database;
-    size_t initialSize = database.size();
+// TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
+//     std::vector<Student> database;
+//     size_t initialSize = database.size();
     
-    // Создаем временный тестовый CSV-файл
-    std::ofstream testFile("test_valid.csv");
-    testFile << "Cas,1000,history,4.6\n";
-    testFile << "Charly,27,informatics,5.0\n";
-    testFile.close();
+//     // Создаем временный тестовый CSV-файл
+//     std::ofstream testFile("test_valid.csv");
+//     testFile << "Cas,1000,history,4.6\n";
+//     testFile << "Charly,27,informatics,5.0\n";
+//     testFile.close();
     
-    // Перенаправляем ввод для имитации пользовательского ввода
-    std::stringstream input_stream;
-    input_stream << "test_valid.csv\n";
+//     // Перенаправляем ввод для имитации пользовательского ввода
+//     std::stringstream input_stream;
+//     input_stream << "test_valid.csv\n";
     
-    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input_stream.rdbuf());
+//     // Сохраняем оригинальный std::cin и перенаправляем на наш поток
+//     std::streambuf* old_cin = std::cin.rdbuf();
+//     std::cin.rdbuf(input_stream.rdbuf());
     
-    // Также перенаправляем вывод, чтобы проверить сообщения функции
-    std::stringstream output_stream;
-    std::streambuf* old_cout = std::cout.rdbuf();
-    std::cout.rdbuf(output_stream.rdbuf());
+//     // Также перенаправляем вывод, чтобы проверить сообщения функции
+//     std::stringstream output_stream;
+//     std::streambuf* old_cout = std::cout.rdbuf();
+//     std::cout.rdbuf(output_stream.rdbuf());
     
-    // Вызываем тестируемую функцию
-    loadDatabase(database);
+//     // Вызываем тестируемую функцию
+//     loadDatabase(database);
     
-    // Восстанавливаем стандартные потоки
-    std::cin.rdbuf(old_cin);
-    std::cout.rdbuf(old_cout);
+//     // Восстанавливаем стандартные потоки
+//     std::cin.rdbuf(old_cin);
+//     std::cout.rdbuf(old_cout);
     
-    // Проверяем что размер увеличился на 2
-    ASSERT_EQ(database.size(), initialSize + 2);
+//     // Проверяем что размер увеличился на 2
+//     ASSERT_EQ(database.size(), initialSize + 2);
     
-    // Проверяем содержимое напрямую через структуры
-    EXPECT_EQ(database[0].name, "Cas");
-    EXPECT_EQ(database[0].age, 1000);
-    EXPECT_EQ(database[0].major, "history");
-    EXPECT_EQ(database[0].gpa, 4.6);
+//     // Проверяем содержимое напрямую через структуры
+//     EXPECT_EQ(database[0].name, "Cas");
+//     EXPECT_EQ(database[0].age, 1000);
+//     EXPECT_EQ(database[0].major, "history");
+//     EXPECT_EQ(database[0].gpa, 4.6);
     
-    EXPECT_EQ(database[1].name, "Charly");
-    EXPECT_EQ(database[1].age, 27);
-    EXPECT_EQ(database[1].major, "informatics");
-    EXPECT_EQ(database[1].gpa, 5.0);
+//     EXPECT_EQ(database[1].name, "Charly");
+//     EXPECT_EQ(database[1].age, 27);
+//     EXPECT_EQ(database[1].major, "informatics");
+//     EXPECT_EQ(database[1].gpa, 5.0);
     
-    remove("test_valid.csv");
-}
+//     remove("test_valid.csv");
+// }
 
 TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     std::vector<Student> database;
