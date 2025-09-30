@@ -60,7 +60,21 @@ void displayStudents(const std::vector<Student>& database) {
  * database - ссылка на вектор студентов 
  * filename - имя файла для загрузки данных
  */
-void loadDatabase(std::vector<Student>& database, const std::string& filename) {
+void loadDatabase(std::vector<Student>& database) {
+    std::string filename;
+    std::cout << "Введите имя файла для загрузки: ";
+    std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
+    std::getline(std::cin, filename); 
+    {
+    // Предварительная проверка существования файла
+        std::ifstream testFile(filename);
+        if (!testFile.is_open()) {
+                std::cout << "Файл не существует или недоступен!\n";
+                testFile.close();
+                break;
+            }
+            testFile.close();
+        }
     std::ifstream file(filename);
     
     // Проверка успешного открытия файла
@@ -154,8 +168,8 @@ TEST(StudentDatabase, DisplayEmptyDatabaseTest) {
 // Тест для функции displayStudents с несколькими студентами
 TEST(StudentDatabase, DisplayMultipleStudentsTest) {
     std::vector<Student> database = {
-        {"Dean W.", 26, "history", 3.5},
-        {"Bobby S.", 62, "languages", 4.9}
+        {"Dean", 26, "history", 3.5},
+        {"Bobby", 62, "languages", 4.9}
     };
     
     // Перехватывает вывод
@@ -169,8 +183,8 @@ TEST(StudentDatabase, DisplayMultipleStudentsTest) {
     std::cout.rdbuf(old_cout);
     
     std::string output = output_stream.str();
-    EXPECT_TRUE(output.find("Dean W.") != std::string::npos);
-    EXPECT_TRUE(output.find("Bobby S.") != std::string::npos);
+    EXPECT_TRUE(output.find("Dean") != std::string::npos);
+    EXPECT_TRUE(output.find("Bobby") != std::string::npos);
     EXPECT_TRUE(output.find("history") != std::string::npos);
     EXPECT_TRUE(output.find("languages") != std::string::npos);
 }
@@ -235,7 +249,6 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
 
 void runInteractiveMode() {
     std::vector<Student> database;
-     std::string filename;
 
     int choice;
     do {
@@ -255,20 +268,7 @@ void runInteractiveMode() {
                 displayStudents(database);
                 break;
             case 3:
-                std::cout << "Введите имя файла для загрузки: ";
-                std::cin.ignore(); // Очистка буфера ввода от предыдущего ввода
-                std::getline(std::cin, filename); 
-                {
-                    // Предварительная проверка существования файла
-                    std::ifstream testFile(filename);
-                    if (!testFile.is_open()) {
-                        std::cout << "Файл не существует или недоступен!\n";
-                        testFile.close();
-                        break;
-                    }
-                    testFile.close();
-                }
-                loadDatabase(database, filename);
+                loadDatabase(database);
                 break;
             case 0:
                 std::cout << "Выход из программы.\n";
