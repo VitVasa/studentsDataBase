@@ -233,18 +233,12 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     remove("test_invalid.csv");
 }
 
+void runInteractiveMode() {
+    std::vector<Student> database;
 
-/**
- * Основная функция программы
- * Содержит главное меню 
- */
-int main() {
-    std::vector<Student> database;  
-    std::string filename;         
-    int choice;                     
-
+    int choice;
     do {
-        std::cout << "\nМеню:\n";
+        std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
         std::cout << "2. Вывести список студентов\n";
         std::cout << "3. Загрузить базу данных из файла\n";
@@ -281,7 +275,21 @@ int main() {
             default:
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
         }
-    } while (choice != 0);  
+    } while (choice != 0);
+}
 
-    return 0;
+/**
+ * Основная функция программы
+ * Содержит главное меню 
+ */
+int main(int argc, char **argv) {
+    // Если есть аргументы командной строки, запускает тесты
+    if (argc > 1) {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
+    } else {
+        // Иначе запускает интерактивное меню
+        runInteractiveMode();
+        return 0;
+    }
 }
