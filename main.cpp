@@ -257,7 +257,25 @@ TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
     testFile << "Crowley,many,history,4.7\n"; // Некорректный возраст
     testFile.close();
     
-    loadDatabase(database, "test_invalid.csv");
+    // Перенаправляем ввод для имитации пользовательского ввода
+    std::stringstream input_stream;
+    input_stream << "test_valid.csv\n"; // Имитируем ввод имени файла
+    
+    // Сохраняем оригинальный std::cin и перенаправляем на наш поток
+    std::streambuf* old_cin = std::cin.rdbuf();
+    std::cin.rdbuf(input_stream.rdbuf());
+    
+    // Также перенаправляем вывод, чтобы проверить сообщения функции
+    std::stringstream output_stream;
+    std::streambuf* old_cout = std::cout.rdbuf();
+    std::cout.rdbuf(output_stream.rdbuf());
+    
+    // Вызываем тестируемую функцию (теперь она запросит файл через cin)
+    loadDatabase(database);
+    
+    // Восстанавливаем стандартные потоки
+    std::cin.rdbuf(old_cin);
+    std::cout.rdbuf(old_cout);
     
     // Проверяем что размер НЕ изменился (данные не добавились)
     EXPECT_EQ(database.size(), initialSize);
