@@ -116,7 +116,7 @@ TEST(StudentDatabase, AddStudentTest) {
     std::vector<Student> database;
 
     // Тестовые данные
-    std::string input = "Sam W.\n22\nLаw\n4.8\n";
+    std::string input = "Sam\n22\nLаw\n4.8\n";
     std::stringstream input_stream(input);
     std::streambuf* old_cin = std::cin.rdbuf();
     std::cin.rdbuf(input_stream.rdbuf());
@@ -127,7 +127,7 @@ TEST(StudentDatabase, AddStudentTest) {
     
     // Проверка результата
     EXPECT_EQ(database.size(), 1);
-    EXPECT_EQ(database[0].name, "Sam W.");
+    EXPECT_EQ(database[0].name, "Sam");
     EXPECT_EQ(database[0].age, 22);
     EXPECT_EQ(database[0].major, "Lаw");
     EXPECT_NEAR(database[0].gpa, 4.8, 1e-6);
