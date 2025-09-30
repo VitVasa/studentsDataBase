@@ -192,14 +192,22 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     size_t initialSize = database.size();
     
     // Создаем временный тестовый CSV-файл
-    std::ofstream testFile("test_valid.csv");
+    std::string testFilename = "test_valid.csv";
+    std::ofstream testFile(testFilename);
     testFile << "Cas,1000,history,4.6\n";
     testFile << "Charly,27,informatics,5.0\n";
     testFile.close();
     
+    // ПРОВЕРКА: убедимся что файл создался
+    std::ifstream checkFile(testFilename);
+    if (!checkFile.is_open()) {
+        FAIL() << "Тестовый файл не создался!";
+    }
+    checkFile.close();
+    
     // Перенаправляем ввод для имитации пользовательского ввода
     std::stringstream input_stream;
-    input_stream << "test_valid.csv\n";
+    input_stream << testFilename << "\n";
     
     // Сохраняем оригинальный std::cin и перенаправляем на наш поток
     std::streambuf* old_cin = std::cin.rdbuf();
@@ -209,6 +217,9 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     std::stringstream output_stream;
     std::streambuf* old_cout = std::cout.rdbuf();
     std::cout.rdbuf(output_stream.rdbuf());
+    
+    // ВАЖНО: очищаем буфер перед вызовом функции
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     
     // Вызываем тестируемую функцию
     loadDatabase(database);
@@ -222,6 +233,7 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     // ДЕБАГ: выведем что получилось
     std::cout << "DEBUG: Database size: " << database.size() << std::endl;
     std::cout << "DEBUG: Output: " << output << std::endl;
+    std::cout << "DEBUG: File exists: " << std::ifstream(testFilename).is_open() << std::endl;
     
     // Проверяем что размер увеличился на 2
     ASSERT_EQ(database.size(), initialSize + 2);
@@ -237,7 +249,7 @@ TEST(LoadDatabaseTest, LoadsValidDataCorrectly) {
     EXPECT_EQ(database[1].major, "informatics");
     EXPECT_EQ(database[1].gpa, 5.0);
     
-    remove("test_valid.csv");
+    remove(testFilename.c_str());
 }
 
 TEST(LoadDatabaseTest, HandlesInvalidNumberFormat) {
