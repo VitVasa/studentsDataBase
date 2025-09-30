@@ -16,10 +16,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtest-dev
+        sudo apt-get install -y libgtest-dev cmake gcovr
         cd /usr/src/gtest && sudo cmake . && sudo make && sudo cp lib/*.a /usr/lib/
         
-    - name: Build and test
+    - name: Build, test and generate coverage
       run: |
-        g++ -std=c++17 -o program.out main.cpp -lgtest -lgtest_main -pthread
+        g++ -std=c++17 --coverage -o program.out main.cpp -lgtest -lgtest_main -pthread
         ./program.out --test
+        gcovr --xml coverage.cobertura.xml
